@@ -15,7 +15,7 @@ func main() {
     var outgoingPorts string
 
     flag.IntVar(&incomingPort, "incoming", 8080, "Port for incoming connections")
-    flag.StringVar(&outgoingPorts, "outgoing", "localhost:8081,localhost:8082", "Comma-separated list of ports for outgoing addresses (IP:Port)")
+    flag.StringVar(&outgoingPorts, "outgoing", "", "Comma-separated list of ports for outgoing addresses (IP:Port)")
     flag.Parse()
 
     outgoingPortList := strings.Split(outgoingPorts, ",")
