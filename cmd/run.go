@@ -6,7 +6,7 @@ import (
     "log"
     "net"
     "strings"
-    "github.com/lex0c/openet/pkg/connection"
+    "github.com/lex0c/openet/pkg/kernel/network"
 )
 
 func main() {
@@ -19,8 +19,8 @@ func main() {
 
     outgoingPortList := strings.Split(outgoingPorts, ",")
 
-    incomingPool := connection.NewPool(nil)
-    outgoingPool := connection.NewPool(outgoingPortList)
+    incomingPool := network.NewPool(nil)
+    outgoingPool := network.NewPool(outgoingPortList)
 
     ln, err := net.Listen("tcp", fmt.Sprintf(":%d", incomingPort))
 
@@ -46,7 +46,7 @@ func main() {
                     continue
                 }
 
-                go connection.HandleConnection(outgoingPool, conn, func(message string) {
+                go network.HandleConnection(outgoingPool, conn, func(message string) {
                     fmt.Println("Received: ", message)
                 })
 			      }
@@ -54,7 +54,7 @@ func main() {
     }
 
     for _, conn := range outgoingPool.ListConnections() {
-        go connection.HandleConnection(incomingPool, conn, func(message string) {
+        go network.HandleConnection(incomingPool, conn, func(message string) {
             log.Println("Received: ", message)
         })
     }

@@ -1,4 +1,4 @@
-package connection
+package network
 
 import (
     "encoding/gob"

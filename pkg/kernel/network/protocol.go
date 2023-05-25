@@ -1,4 +1,4 @@
-package connection
+package network
 
 type Message struct {
     Kind string
