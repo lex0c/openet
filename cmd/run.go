@@ -7,6 +7,7 @@ import (
     "net"
     "strings"
     "github.com/lex0c/openet/pkg/kernel/network"
+    "github.com/lex0c/openet/pkg/config"
 )
 
 func main() {
@@ -19,8 +20,8 @@ func main() {
 
     outgoingPortList := strings.Split(outgoingPorts, ",")
 
-    incomingPool := network.NewPool(nil)
-    outgoingPool := network.NewPool(outgoingPortList)
+    incomingPool := network.NewPool(nil, config.MaxIncomingConnections)
+    outgoingPool := network.NewPool(outgoingPortList, config.MaxOutgoingConnections)
 
     ln, err := net.Listen("tcp", fmt.Sprintf(":%d", incomingPort))
 

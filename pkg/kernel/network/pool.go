@@ -10,6 +10,7 @@ import (
 
 type Pool struct {
     connections []net.Conn
+    size        int
     mx          sync.Mutex
 }
 
@@ -17,8 +18,8 @@ func (p *Pool) Add(conn net.Conn) error {
     p.mx.Lock()
     defer p.mx.Unlock()
 
-    if len(p.connections) >= 4 {
-        return fmt.Errorf("Connection pool is full")
+    if len(p.connections) >= p.size {
+        return fmt.Errorf("Connection pool is full", conn.RemoteAddr())
     }
 
     p.connections = append(p.connections, conn)
@@ -59,9 +60,10 @@ func (p *Pool) ListConnections() []net.Conn {
     return p.connections
 }
 
-func NewPool(peers []string) *Pool {
+func NewPool(peers []string, size int) *Pool {
     pool := &Pool{
         connections: make([]net.Conn, 0),
+        size: size,
     }
 
     for _, peer := range peers {
@@ -69,9 +71,11 @@ func NewPool(peers []string) *Pool {
 
         if err != nil {
             log.Println(err)
-        } else {
-            pool.connections = append(pool.connections, conn)
-            log.Println("Connected to", peer)
+            continue
+        }
+
+        if err = pool.Add(conn); err != nil {
+            log.Println(err)
         }
     }
 
