@@ -6,10 +6,11 @@ import (
     "log"
     "net"
     "sync"
+    "io"
 )
 
 type Pool struct {
-    connections []net.Conn
+    connections map[net.Conn]struct{}
     size        int
     mx          sync.Mutex
 }
@@ -18,12 +19,20 @@ func (p *Pool) Add(conn net.Conn) error {
     p.mx.Lock()
     defer p.mx.Unlock()
 
-    if len(p.connections) >= p.size {
-        return fmt.Errorf("Connection pool is full", conn.RemoteAddr())
+    remoteAddr := conn.RemoteAddr().String()
+
+    if _, ok := p.connections[conn]; ok {
+        return fmt.Errorf("Connection already exists", remoteAddr)
     }
 
-    p.connections = append(p.connections, conn)
-    log.Println("Added new connection", conn.RemoteAddr())
+    if len(p.connections) >= p.size {
+        return fmt.Errorf("Connection pool is full", remoteAddr)
+    }
+
+    p.connections[conn] = struct{}{}
+
+    log.Println("Added new connection", remoteAddr)
+
     return nil
 }
 
@@ -31,11 +40,13 @@ func (p *Pool) Remove(conn net.Conn) {
     p.mx.Lock()
     defer p.mx.Unlock()
 
-    for i, c := range p.connections {
-        if c == conn {
-            p.connections = append(p.connections[:i], p.connections[i+1:]...)
-            log.Println("Removed connection", conn.RemoteAddr())
-            return
+    if _, ok := p.connections[conn]; ok {
+        delete(p.connections, conn)
+
+        if err := conn.Close(); err != nil {
+            log.Println(err)
+        } else {
+            log.Println("Connection closed", conn.RemoteAddr())
         }
     }
 }
@@ -44,12 +55,12 @@ func (p *Pool) Broadcast(msg Message) {
     p.mx.Lock()
     defer p.mx.Unlock()
 
-    for _, conn := range p.connections {
+    for conn, _ := range p.connections {
         encoder := gob.NewEncoder(conn)
 
         if err := encoder.Encode(msg); err != nil {
             log.Println(err)
-            continue
+            p.Remove(conn)
         }
 
 		    log.Println("Broadcasted message", msg.Kind, "to:", conn.RemoteAddr())
@@ -57,12 +68,21 @@ func (p *Pool) Broadcast(msg Message) {
 }
 
 func (p *Pool) ListConnections() []net.Conn {
-    return p.connections
+    p.mx.Lock()
+    defer p.mx.Unlock()
+
+    connections := make([]net.Conn, 0, len(p.connections))
+
+    for conn, _ := range p.connections {
+        connections = append(connections, conn)
+    }
+
+    return connections
 }
 
 func NewPool(peers []string, size int) *Pool {
     pool := &Pool{
-        connections: make([]net.Conn, 0),
+        connections: make(map[net.Conn]struct{}),
         size: size,
     }
 
@@ -89,9 +109,13 @@ func HandleConnection(pool *Pool, conn net.Conn, callback func(message string)) 
         var msg Message
 
         if err := decoder.Decode(&msg); err != nil {
-            log.Println("Failed to decode message from", conn.RemoteAddr(), " | ", err)
+            if err == io.EOF {
+                log.Println("Connection closed", conn.RemoteAddr())
+            } else {
+                log.Println("Failed to decode message from", conn.RemoteAddr(), " | ", err)
+            }
+
             pool.Remove(conn)
-            conn.Close()
             return
         }
 
