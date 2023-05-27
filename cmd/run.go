@@ -6,7 +6,7 @@ import (
     "log"
     "net"
     "strings"
-    "github.com/lex0c/openet/pkg/kernel/network"
+    "github.com/lex0c/openet/pkg/network"
     "github.com/lex0c/openet/pkg/config"
 )
 

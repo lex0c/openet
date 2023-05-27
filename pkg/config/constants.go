@@ -1,7 +1,7 @@
 package config
 
 const (
-    MaxIncomingConnections int = 4
-    MaxOutgoingConnections int = 4
+    MaxIncomingConnections int = 1
+    MaxOutgoingConnections int = 1
 )
 

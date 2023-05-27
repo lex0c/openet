@@ -51,6 +51,23 @@ func (p *Pool) Remove(conn net.Conn) {
     }
 }
 
+func (p *Pool) Send(conn net.Conn, msg Message) error {
+    p.mx.Lock()
+    defer p.mx.Unlock()
+
+    if _, ok := p.connections[conn]; !ok {
+        return fmt.Errorf("Connection does not exist")
+    }
+
+    encoder := gob.NewEncoder(conn)
+
+    if err := encoder.Encode(msg); err != nil {
+        return err
+    }
+
+    return nil
+}
+
 func (p *Pool) Broadcast(msg Message) {
     p.mx.Lock()
     defer p.mx.Unlock()
@@ -78,6 +95,19 @@ func (p *Pool) ListConnections() []net.Conn {
     }
 
     return connections
+}
+
+func (p *Pool) ListRemoteAddrs() []string {
+    p.mx.Lock()
+    defer p.mx.Unlock()
+
+    addrs := make([]string, 0, len(p.connections))
+
+    for conn, _ := range p.connections {
+        addrs = append(addrs, conn.RemoteAddr().String())
+    }
+
+    return addrs
 }
 
 func NewPool(peers []string, size int) *Pool {
@@ -120,7 +150,7 @@ func HandleConnection(pool *Pool, conn net.Conn, callback func(message string)) 
         }
 
         callback(msg.Kind)
-        pool.Broadcast(msg)
+        //pool.Broadcast(msg)
     }
 }
 
