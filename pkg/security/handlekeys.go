@@ -6,6 +6,9 @@ import (
     "crypto/x509"
     "encoding/pem"
     "fmt"
+    "os"
+    "io/fs"
+
     "github.com/lex0c/openet/pkg/config"
 )
 
@@ -27,7 +30,7 @@ func WritePrivateKeyToFile(privateKey *rsa.PrivateKey, filepath string) error {
 
     privateKeyPem := pem.EncodeToMemory(privateKeyBlock)
 
-    if err := os.WriteFile(filepath, privateKeyPem, config.KeyPermMode); err != nil {
+    if err := os.WriteFile(filepath, privateKeyPem, fs.FileMode(config.KeyPermMode)); err != nil {
         return fmt.Errorf("Error writing private key to file: %w", err)
     }
 
@@ -35,7 +38,7 @@ func WritePrivateKeyToFile(privateKey *rsa.PrivateKey, filepath string) error {
 }
 
 func ReadPrivateKeyFromFile(filepath string) (*rsa.PrivateKey, error) {
-    privateKeyPem, err := ioutil.ReadFile(filepath)
+    privateKeyPem, err := os.ReadFile(filepath)
 
     if err != nil {
         return nil, fmt.Errorf("Error reading private key file: %w", err)
