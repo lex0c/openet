@@ -22,6 +22,8 @@ Here are the main functions provided in the `security` package:
 
 8. **VerifySignature**: This function verifies a given message's signature with a public key.
 
+9. **ValidatePublicKeyPem**: This function will return `nil` if the public key string is properly formatted, or an error message if it is not.
+
 ## Usage
 
 ### Key Generation
@@ -94,6 +96,14 @@ The `VerifySignature` function can be used to verify the authenticity of a messa
 
 ```go
 err := security.VerifySignature(publicKey, []byte("Hello"), signature)
+```
+
+### Validate Public Key
+
+The `ValidatePublicKeyPem` function will return `nil` if the public key string is properly formatted, or an error message if it is not.
+
+```go
+err := security.ValidatePublicKeyPem(publicKeyPem)
 ```
 
 ### Testing

@@ -191,3 +191,24 @@ func TestSignVerify(t *testing.T) {
 		}
 }
 
+func TestValidatePublicKeyPem(t *testing.T) {
+    _, publicKey, err := GenerateKeys()
+
+    if err != nil {
+        t.Fatal(fmt.Errorf("Error generating keys: %w", err))
+    }
+
+    publicKeyPem, err := EncodePublicKey(publicKey)
+
+    if err != nil {
+        t.Fatalf("Failed to encode public key: %v", err)
+    }
+
+    if err := ValidatePublicKeyPem(publicKeyPem); err != nil {
+        t.Fatalf("Failed to validate public key: %v", err)
+    }
+
+    if err := ValidatePublicKeyPem("invalid key"); err == nil {
+        t.Fatalf("Expected an error for invalid public key, but got none")
+    }
+}

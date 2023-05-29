@@ -100,3 +100,8 @@ func DecodePublicKey(publicKeyPem string) (*rsa.PublicKey, error) {
     return rsaPublicKey, nil
 }
 
+func ValidatePublicKeyPem(publicKeyPem string) error {
+    _, err := DecodePublicKey(publicKeyPem)
+    return err
+}
+
