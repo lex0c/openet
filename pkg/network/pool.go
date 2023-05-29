@@ -22,11 +22,11 @@ func (p *Pool) Add(conn net.Conn) error {
     remoteAddr := conn.RemoteAddr().String()
 
     if _, ok := p.connections[conn]; ok {
-        return fmt.Errorf("Connection already exists", remoteAddr)
+        return fmt.Errorf("Connection already exists %s", remoteAddr)
     }
 
     if len(p.connections) >= p.size {
-        return fmt.Errorf("Connection pool is full", remoteAddr)
+        return fmt.Errorf("Connection pool is full %s", remoteAddr)
     }
 
     p.connections[conn] = struct{}{}

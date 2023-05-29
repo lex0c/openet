@@ -6,8 +6,8 @@ const (
 )
 
 const (
-    KeySizeInBits int 4096
-    KeyFileName string "openetkey.pem"
-    KeyPermMode int 0600
+    KeySizeInBits int = 4096
+    KeyFileName string = "openetkey.pem"
+    KeyPermMode int = 0600
 )
 
