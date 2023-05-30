@@ -105,3 +105,15 @@ func ValidatePublicKeyPem(publicKeyPem string) error {
     return err
 }
 
+func GetMyAddress(privateKey *rsa.PrivateKey) (string, error) {
+    pubKey := ReadPublicKeyFromPrivateKey(privateKey)
+
+    addr, err := EncodePublicKey(pubKey)
+
+    if err != nil {
+        return "", fmt.Errorf("An error occurred: %v", err)
+    }
+
+    return addr, nil
+}
+
