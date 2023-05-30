@@ -47,7 +47,7 @@ func main() {
                     continue
                 }
 
-                go network.HandleConnection(outgoingPool, conn, func(message string) {
+                go network.HandleConnection(outgoingPool, conn, func(message []byte) {
                     fmt.Println("Received: ", message)
                 })
 			      }
@@ -55,7 +55,7 @@ func main() {
     }
 
     for _, conn := range outgoingPool.ListConnections() {
-        go network.HandleConnection(incomingPool, conn, func(message string) {
+        go network.HandleConnection(incomingPool, conn, func(message []byte) {
             log.Println("Received: ", message)
         })
     }

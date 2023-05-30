@@ -51,7 +51,7 @@ func (p *Pool) Remove(conn net.Conn) {
     }
 }
 
-func (p *Pool) Send(conn net.Conn, msg Message) error {
+func (p *Pool) Send(conn net.Conn, msg []byte) error {
     p.mx.Lock()
     defer p.mx.Unlock()
 
@@ -68,7 +68,7 @@ func (p *Pool) Send(conn net.Conn, msg Message) error {
     return nil
 }
 
-func (p *Pool) Broadcast(msg Message) {
+func (p *Pool) Broadcast(msg []byte) {
     p.mx.Lock()
     defer p.mx.Unlock()
 
@@ -80,7 +80,7 @@ func (p *Pool) Broadcast(msg Message) {
             p.Remove(conn)
         }
 
-		    log.Println("Broadcasted message", msg.Kind, "to:", conn.RemoteAddr())
+		    log.Println("Broadcasted message", "to:", conn.RemoteAddr())
     }
 }
 
@@ -132,11 +132,11 @@ func NewPool(peers []string, size int) *Pool {
     return pool
 }
 
-func HandleConnection(pool *Pool, conn net.Conn, callback func(message string)) {
+func HandleConnection(pool *Pool, conn net.Conn, callback func(message []byte)) {
     decoder := gob.NewDecoder(conn)
 
     for {
-        var msg Message
+        var msg []byte
 
         if err := decoder.Decode(&msg); err != nil {
             if err == io.EOF {
@@ -149,7 +149,7 @@ func HandleConnection(pool *Pool, conn net.Conn, callback func(message string)) 
             return
         }
 
-        callback(msg.Kind)
+        callback(msg)
         //pool.Broadcast(msg)
     }
 }
