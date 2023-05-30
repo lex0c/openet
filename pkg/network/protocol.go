@@ -1,9 +1,18 @@
 package network
 
+import (
+    "net"
+)
+
 type Message struct {
-    Kind string
-    Version string
-    Data string
-    Datetime string
+    Data        interface{}
+    Signature   string
+}
+
+type NodeInfo struct {
+    Ip          net.IP
+    Address     string
+    UpdatedAt   string
+    TTL         int
 }
 

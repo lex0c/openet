@@ -14,5 +14,6 @@ const (
 
 const (
     MyIPRoute string = "/my-ip"
+    NodeIPCacheTTL int = 3600
 )
 
